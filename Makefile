@@ -1,0 +1,1 @@
+clear && npm i && npm start
