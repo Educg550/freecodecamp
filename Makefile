@@ -1,1 +1,4 @@
-clear && npm i && npm start
+all: 
+	clear && npm i && npm start
+
+clean: clear
