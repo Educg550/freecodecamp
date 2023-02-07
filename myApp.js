@@ -53,7 +53,7 @@ const findPeopleByName = (personName, done) => {
 
 const findOneByFood = (food, done) => {
   // It can be just one food, it will try to find it on the array
-  Person.findOne({ favoriteFoods: [food] }, (err, data) => {
+  Person.findOne({ favoriteFoods: food }, (err, data) => {
     if (err) return console.log(err);
     done(null, data);
   });
@@ -80,24 +80,41 @@ const findEditThenSave = (personId, done) => {
 
 const findAndUpdate = (personName, done) => {
   const ageToSet = 20;
-
-  done(null /*, data*/);
+  Person.findOneAndUpdate(
+    { name: personName },
+    { age: ageToSet },
+    { new: true },
+    (err, data) => {
+      if (err) return console.log(err);
+      done(null, data);
+    }
+  );
 };
 
 const removeById = (personId, done) => {
-  done(null /*, data*/);
+  Person.findByIdAndRemove(personId, (err, data) => {
+    if (err) return console.log(err);
+    done(null, data);
+  });
 };
 
 const removeManyPeople = (done) => {
   const nameToRemove = "Mary";
-
-  done(null /*, data*/);
+  Person.remove({ name: nameToRemove }, (err, data) => {
+    if (err) return console.log(err);
+    done(null, data);
+  });
 };
 
 const queryChain = (done) => {
   const foodToSearch = "burrito";
-
-  done(null /*, data*/);
+  Person.find({ favoriteFoods: foodToSearch })
+    .sort({ name: 1 })
+    .limit(2)
+    .select({ age: 0 })
+    .exec((err, data) => {
+      done(err, data);
+    });
 };
 
 /** **Well Done !!**
