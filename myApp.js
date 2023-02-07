@@ -6,40 +6,76 @@ mongoose.connect(process.env.MONGO_URI, {
   useUnifiedTopology: true,
 });
 
-// Similar to tables in SQL
+// A template of "rows" in our Collection
 const personSchema = new mongoose.Schema({
   name: String,
   age: Number,
   favoriteFoods: [String],
 });
 
-// Creating an "instance" from the Schema
-let Person = mongoose.model("Person", personSchema);
+// Creating an instance of the Model from the Schema
+const Person = mongoose.model("Person", personSchema);
 
 const createAndSavePerson = (done) => {
-  done(null /*, data*/);
+  // Creating an instance of a Document from the Model
+  const eduardo = new Person({
+    name: "Eduardo",
+    age: 19,
+    favoriteFoods: ["Beans", "Strogonoff", "Big tray"],
+  });
+  eduardo.save((err, data) => {
+    if (err) return console.log(err);
+    done(null, data);
+  });
 };
 
-const createManyPeople = (arrayOfPeople, done) => {
-  done(null /*, data*/);
+const createManyPeople = (
+  arrayOfPeople = [
+    { name: "zuzu", age: 19, favoriteFoods: ["Beans"] },
+    { name: "zazi", age: 20, favoriteFoods: ["Thighs"] },
+    { name: "zeze", age: 19, favoriteFoods: ["Bandejime"] },
+  ],
+  done
+) => {
+  Person.create(arrayOfPeople, (err, data) => {
+    if (err) return console.log(err);
+
+    done(null, data);
+  });
 };
 
 const findPeopleByName = (personName, done) => {
-  done(null /*, data*/);
+  Person.find({ name: personName }, (err, data) => {
+    if (err) return console.log(err);
+    done(null, data);
+  });
 };
 
 const findOneByFood = (food, done) => {
-  done(null /*, data*/);
+  // It can be just one food, it will try to find it on the array
+  Person.findOne({ favoriteFoods: [food] }, (err, data) => {
+    if (err) return console.log(err);
+    done(null, data);
+  });
 };
 
 const findPersonById = (personId, done) => {
-  done(null /*, data*/);
+  Person.findById(personId, (err, data) => {
+    if (err) return console.log(err);
+    done(null, data);
+  });
 };
 
 const findEditThenSave = (personId, done) => {
   const foodToAdd = "hamburger";
-
-  done(null /*, data*/);
+  Person.findById(personId, (err, data) => {
+    if (err) return console.log(err);
+    data.favoriteFoods.push(foodToAdd);
+    data.save((saveErr, saveData) => {
+      if (saveErr) return console.log(saveErr);
+      done(null, saveData);
+    });
+  });
 };
 
 const findAndUpdate = (personName, done) => {
