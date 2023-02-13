@@ -93,11 +93,7 @@ app.post("/api/shorturl", (req, res) => {
 
       url.save(url, (err, data) => {
         if (err) return console.log(err);
-        console.log(`Criou! ${data}`);
-        app.get(`/api/shorturl/${shortened}`, (req, res) => {
-          // 302: Found -> redirect
-          res.redirect(data.original_url);
-        });
+        // console.log(`Criou! ${data}`);
       });
     }
   });
@@ -105,6 +101,13 @@ app.post("/api/shorturl", (req, res) => {
   res.json({
     original_url: req.body.url,
     short_url: shortened,
+  });
+});
+
+app.get(`/api/shorturl/:url`, (req, res) => {
+  // 301: Permanent redirect
+  Url.findOne({ short_url: req.params.url }, (err, data) => {
+    res.redirect(301, data.original_url);
   });
 });
 
