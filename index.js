@@ -52,7 +52,9 @@ const hashify = (url, seed = 0) => {
 const isValidUrl = (url) => {
   try {
     new URL(url);
-    return true;
+    return !!url.match(
+      /^(http(s)?:\/\/)[\w.-]+(?:\.[\w\.-]+)+[\w\-\._~:/?#[\]@!\$&'\(\)\*\+,;=.]+$/
+    );
   } catch (err) {
     return false;
   }
