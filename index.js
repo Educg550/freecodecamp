@@ -75,9 +75,9 @@ app.post("/api/users/:_id/exercises", (req, res) => {
     if (err) return console.log(err);
     if (data) {
       const exerciseLog = {
-        description: req.body.description,
-        duration: req.body.duration,
         date: parseDate(req.body.date),
+        duration: Number(req.body.duration),
+        description: req.body.description,
       };
       data.log.push({
         ...exerciseLog,
@@ -85,9 +85,9 @@ app.post("/api/users/:_id/exercises", (req, res) => {
       data.save((err, data) => {
         if (err) return console.log(err);
         return res.json({
+          _id: req.body[":_id"],
           username: data.username,
           ...exerciseLog,
-          _id: req.body[":_id"],
         });
       });
     } else res.json({ error: "invalid user" });
@@ -99,9 +99,9 @@ app.get("/api/users/:_id/logs", (req, res) => {
     if (err) return console.log(err);
     if (data) {
       res.json({
+        _id: data._id,
         username: data.username,
         count: data.log.length,
-        _id: data._id,
         log: data.log
           .filter(({ date }) => {
             const fromDate = req.query.from
@@ -116,7 +116,7 @@ app.get("/api/users/:_id/logs", (req, res) => {
           })
           .map(({ description, duration, date }) => {
             const updatedDate = new Date(date).toDateString();
-            return { description, duration, updatedDate };
+            return { description, duration, date: updatedDate };
           })
           .slice(
             0,
