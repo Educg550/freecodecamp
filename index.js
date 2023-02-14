@@ -7,7 +7,7 @@ require("dotenv").config();
 
 // Mongoose setup
 mongoose.set("strictQuery", false);
-mongoose.set("debug", true);
+// mongoose.set("debug", true);
 mongoose.connect(process.env.MONGO_URI, {
   useNewUrlParser: true,
   useUnifiedTopology: true,
@@ -19,7 +19,7 @@ const userSchema = mongoose.Schema({
     {
       description: String,
       duration: Number,
-      date: Date,
+      date: String,
     },
   ],
 });
@@ -27,6 +27,7 @@ const userSchema = mongoose.Schema({
 const User = mongoose.model("User", userSchema);
 
 const parseDate = (input) => {
+  if (!input) return new Date().toDateString();
   const parts = input.split("-");
 
   const date = new Date(parts[0], parts[1] - 1, parts[2]).toDateString();
@@ -76,9 +77,7 @@ app.post("/api/users/:_id/exercises", (req, res) => {
       const exerciseLog = {
         description: req.body.description,
         duration: req.body.duration,
-        date: req.body.date
-          ? parseDate(req.body.date)
-          : new Date().toDateString(),
+        date: parseDate(req.body.date),
       };
       data.log.push({
         ...exerciseLog,
@@ -88,6 +87,7 @@ app.post("/api/users/:_id/exercises", (req, res) => {
         return res.json({
           username: data.username,
           ...exerciseLog,
+          _id: req.body[":_id"],
         });
       });
     } else res.json({ error: "invalid user" });
@@ -95,16 +95,32 @@ app.post("/api/users/:_id/exercises", (req, res) => {
 });
 
 app.get("/api/users/:_id/logs", (req, res) => {
-  console.log(req.params);
   User.findById(req.params._id, (err, data) => {
     if (err) return console.log(err);
-    console.log(data);
     if (data) {
       res.json({
         username: data.username,
         count: data.log.length,
         _id: data._id,
-        log: data.log,
+        log: data.log
+          .filter(({ date }) => {
+            const fromDate = req.query.from
+              ? new Date(parseDate(req.query.from))
+              : new Date(date);
+            const toDate = req.query.to
+              ? new Date(parseDate(req.query.to))
+              : new Date(date);
+            const exerciseDate = new Date(date);
+
+            return fromDate <= exerciseDate && exerciseDate <= toDate;
+          })
+          .map(({ description, duration, date }) => {
+            return { description, duration, date };
+          })
+          .slice(
+            0,
+            req.query.limit ? Number(req.query.limit) : data.log.length
+          ),
       });
     }
   });
