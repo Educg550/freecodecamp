@@ -115,7 +115,8 @@ app.get("/api/users/:_id/logs", (req, res) => {
             return fromDate <= exerciseDate && exerciseDate <= toDate;
           })
           .map(({ description, duration, date }) => {
-            return { description, duration, date };
+            const updatedDate = new Date(date).toDateString();
+            return { description, duration, updatedDate };
           })
           .slice(
             0,
