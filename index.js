@@ -7,7 +7,7 @@ require("dotenv").config();
 
 // Mongoose setup
 mongoose.set("strictQuery", false);
-// mongoose.set("debug", true);
+mongoose.set("debug", true);
 mongoose.connect(process.env.MONGO_URI, {
   useNewUrlParser: true,
   useUnifiedTopology: true,
@@ -71,7 +71,7 @@ app.post("/api/users", (req, res) => {
 });
 
 app.post("/api/users/:_id/exercises", (req, res) => {
-  User.findById(req.body[":_id"], (err, data) => {
+  User.findById(req.params._id, (err, data) => {
     if (err) return console.log(err);
     if (data) {
       const exerciseLog = {
@@ -85,7 +85,7 @@ app.post("/api/users/:_id/exercises", (req, res) => {
       data.save((err, data) => {
         if (err) return console.log(err);
         return res.json({
-          _id: req.body[":_id"],
+          _id: req.params._id,
           username: data.username,
           ...exerciseLog,
         });
